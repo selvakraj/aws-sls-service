@@ -1,0 +1,44 @@
+service:
+  name: faculty-detail-service
+
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-1
+  environment:
+    FACULTY_BUCKET_NAME: ${self:custom.FacultyBucket.name}
+
+  iamRoleStatements:
+    - ${file(iam/FacultyBucketIAM.yml):FacultyBucketIAM}
+
+resources:
+  Resources:
+    FacultyBucket: ${file(resources/FacultyBucket.yml):FacultyBucket}
+    FacultyBucketPolicy: ${file(resources/FacultyBucket.yml):FacultyBucketPolicy}
+
+functions:
+  uploadJsonData:
+    handler: src/handlers/uploadJsonData.handler
+    events:
+      - http:
+          method: POST
+          path: user/{id}/json
+
+  getJsonData:
+    handler: src/handlers/getJsonData.handler
+    events:
+      - http:
+          method: GET
+          path: /user/{id}
+
+custom:
+  FacultyBucket:
+    name: faculty-bucket-asdfmay29-${self:provider.stage}
+  bundle:
+    linting: false

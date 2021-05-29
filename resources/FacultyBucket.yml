@@ -1,0 +1,22 @@
+FacultyBucket:
+  Type: AWS::S3::Bucket
+  Properties:
+    BucketName: ${self:custom.FacultyBucket.name}
+    LifecycleConfiguration:
+      Rules:
+        - Id: ExpirePictures
+          Status: Enabled
+          ExpirationInDays: 30
+
+FacultyBucketPolicy:
+  Type: AWS::S3::BucketPolicy
+  Properties:
+    Bucket: !Ref FacultyBucket
+    PolicyDocument:
+      Statement:
+        - Sid: PublicRead
+          Effect: Allow
+          Principal: '*'
+          Action:
+            - s3:GetObject
+          Resource: arn:aws:s3:::${self:custom.FacultyBucket.name}/*
